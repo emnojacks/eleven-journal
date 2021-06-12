@@ -8,9 +8,11 @@ const { UniqueConstraintError } = require('sequelize/lib/errors');
  We use object deconstructing to import the user model and store it in UserModel variable. 
 */
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs")
-    //user router var to access Router methods 
-    //this is an example of a user posting to the db 
+const bcrypt = require("bcryptjs");
+
+
+//user router var to access Router methods 
+//this is an example of a user posting to the db 
 router.post('/register', async(req, res) => {
     /* We use the UserModel variable we
      created on line 2 to access the model 
@@ -41,18 +43,18 @@ router.post('/register', async(req, res) => {
             //user.id is the id of the user in the user model/table in the DB
             //second param is the signature which is apassword to encode and decode token
             //third param is expiration in seconds, mins, hrs 
-            jwt.sign({ id: User.id }, process.env.JWT_SECRET, { expiresIn: 60 * 60 * 24 }) //res.send("this is our user/registration endpoint");
-            //the .status method allows us to add a status code to our response
-            //.json packages response as a json object
-            //201 status code indicates something was successfully created 
-            //200 just means general success
+            jwt.sign({ id: User.id }, process.env.JWT_SECRET, { expiresIn: 60 * 60 * 24 }); //res.send("this is our user/registration endpoint");
+        //the .status method allows us to add a status code to our response
+        //.json packages response as a json object
+        //201 status code indicates something was successfully created 
+        //200 just means general success
 
         res.status(201).json({
             //always good practices to add an add'ln msg 
             message: "user successfully registered",
             user: User,
             //adding token to the body of the response
-            sesionToken: token,
+            sesionToken: token
         });
     } catch (err) {
         if (err instanceof UniqueConstraintError) {
@@ -83,28 +85,34 @@ router.post("/login", async(req, res) => {
         //this if statement checks whether the loginUser object is true or false
         //if the object is null it is falsy and therefore the catch block is triggered
         if (loginUser) {
-            res.status(200).json({
-                //always good practices to add an add'ln msg 
-                //this body key value pair must match the const object you are creating in the 
-                //await async func above
-                user: loginUser,
-                message: "User successfully logged in",
-                sessionToken: token,
-
-            });
-            let token =
-                jwt.sign({ id: User.id }, process.env.JWT_SECRET, { expiresIn: 60 * 60 * 24 }) //res.send("this is our user/registration endpoint");
-
-
+            //bcrypt compare method acceps 4 params - pswd string, hash, failure callback func, progress / resolution callback func,
+            //if callback funcs ommitted there is a boolean returned in a promise - which is why we use await 
+            let passwordComparison = await bcrypt.compare(password, loginUser.password);
+            if (passwordComparison) {
+                let token =
+                    jwt.sign({ id: User.id }, process.env.JWT_SECRET, { expiresIn: 60 * 60 * 24 }); //res.send("this is our user/registration endpoint");
+                res.status(200).json({
+                    //always good practices to add an add'ln msg 
+                    //this body key value pair must match the const object you are creating in the 
+                    //await async func above
+                    user: loginUser,
+                    message: "User successfully logged in",
+                    sessionToken: token,
+                });
+            } else {
+                res.status(401).json({
+                    message: "incorrect email or password",
+                })
+            }
         } else {
             res.status(401).json({
-                message: "Login attempt failed"
+                message: "incorrect email or password",
             });
         }
     } catch (err) {
         res.status(500).json({
-            message: "Cannot log in user",
-        });
+            message: "Failed to log in user",
+        })
     }
 });
 
