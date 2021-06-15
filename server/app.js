@@ -5,7 +5,9 @@ const Express = require("express");
 const app = Express();
 //create db var that imports db file 
 const dbConnection = require('./db');
-
+//headers must be sernt before routes are declared 
+//this takes cares of CORS errors 
+app.use(require('./middleware/headers'));
 //import controllers that we just exported into index.js and store in var 
 const controllers = require("./controllers");
 

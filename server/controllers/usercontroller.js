@@ -74,13 +74,14 @@ router.post('/register', async(req, res) => {
 //object 
 router.post("/login", async(req, res) => {
     let { email, password } = req.body.user;
+
     try {
         //we await the data response and store it in an object called loginuser
-        const loginUser = await UserModel.findOne({
+        let loginUser = await UserModel.findOne({
             //we filter what to look for with a where clause 
             where: {
                 email: email,
-            }
+            },
         });
         //this if statement checks whether the loginUser object is true or false
         //if the object is null it is falsy and therefore the catch block is triggered
@@ -90,7 +91,7 @@ router.post("/login", async(req, res) => {
             let passwordComparison = await bcrypt.compare(password, loginUser.password);
             if (passwordComparison) {
                 let token =
-                    jwt.sign({ id: User.id }, process.env.JWT_SECRET, { expiresIn: 60 * 60 * 24 }); //res.send("this is our user/registration endpoint");
+                    jwt.sign({ id: loginUser.id }, process.env.JWT_SECRET, { expiresIn: 60 * 60 * 24 }); //res.send("this is our user/registration endpoint");
                 res.status(200).json({
                     //always good practices to add an add'ln msg 
                     //this body key value pair must match the const object you are creating in the 
