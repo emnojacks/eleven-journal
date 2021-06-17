@@ -88,5 +88,23 @@ function userLogout() { 
  ************************** */
 function tokenChecker() { 
     console.log('tokenChecker Function Called');
+    let display = document.getElementById('journals');
+    let header = document.createElement("h5");
+    let accessToken = localStorage.getItem("SessionToken");
+    let alertText = "log in or sign up to get started posting"
+
+    //rmoves all child of the display div
+    for (let i = 0; i < display.childNodes.length; i++) {
+        display.removeChild(display.firstChild);
+    }
+    //checks if you're logges out 
+    if (accessToken === 'undefined') {
+        //aleting user that they arent logged in
+        display.appendChild(header);
+        header.textContent = alertText;
+        header.setAttribute("id", "defaultLogin");
+    } else {
+        null
+    }
 }
 tokenChecker()

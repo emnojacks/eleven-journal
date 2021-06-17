@@ -85,4 +85,22 @@ function editJournal(postId) { 
  ************************** */
 function deleteJournal(postId) { 
     console.log('deleteJournal Function Called')
-}
+    const fetch_url = `http://localhost:3000/journal/delete/${postId}`;
+    const accessToken = localStorage.getItem('SessionToken');
+
+    fetch(fetch_url, {
+            method: "DELETE",
+            headers: new Headers({
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${accessToken}`
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            displayMine();
+        })
+        .catch(err => {
+            console.error(err)
+        })
+};
